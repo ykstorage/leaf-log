@@ -86,3 +86,6 @@ pnpm-lock.yaml
 # Backup files
 *.bak
 *.backup
+
+# Claude
+.claude/
