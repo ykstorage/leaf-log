@@ -1,3 +1,5 @@
+# TEST
+
 # Leaf Log 배포 가이드
 
 이 문서는 Leaf Log 프로젝트를 AWS에 배포하는 전체 과정을 설명합니다.
@@ -45,6 +47,7 @@ gh auth login
 ### 2. AWS 계정 설정
 
 1. **IAM 사용자 생성** (프로그래매틱 액세스)
+
    - 권한: AdministratorAccess (초기 설정용)
    - Access Key ID와 Secret Access Key 저장
 
@@ -123,6 +126,7 @@ terraform plan
 ```
 
 예상 비용 확인:
+
 - RDS PostgreSQL: ~$12/월
 - NAT Gateway: ~$32/월
 - S3 + Lambda: ~$2/월
@@ -284,6 +288,7 @@ aws logs tail /aws/apigateway/leaf-log-api --follow
 **증상**: 첫 API 호출 시 5-10초 소요
 
 **해결**:
+
 ```bash
 # Lambda 메모리 증가 (CPU도 함께 증가)
 aws lambda update-function-configuration \
@@ -292,6 +297,7 @@ aws lambda update-function-configuration \
 ```
 
 또는 `terraform/lambda.tf`에서:
+
 ```hcl
 memory_size = 1024  # 기본: 512
 ```
@@ -301,6 +307,7 @@ memory_size = 1024  # 기본: 512
 **증상**: Lambda에서 "unable to connect to database" 오류
 
 **확인사항**:
+
 1. Lambda가 VPC 내부에 있는지 확인
 2. 보안 그룹이 Lambda → RDS 포트 5432 허용하는지 확인
 3. RDS 엔드포인트가 올바른지 확인
@@ -320,6 +327,7 @@ aws ec2 describe-security-groups \
 **증상**: `npm run build` 시 타입 오류
 
 **해결**:
+
 ```bash
 cd leaf-log-frontend
 
@@ -336,6 +344,7 @@ npm run type-check || true
 **증상**: 새 배포 후에도 이전 버전이 보임
 
 **해결**:
+
 ```bash
 # 캐시 완전 무효화
 aws cloudfront create-invalidation \
@@ -351,6 +360,7 @@ aws cloudfront get-invalidation \
 ### 비용 초과
 
 **확인**:
+
 ```bash
 # 현재 월 비용 확인
 aws ce get-cost-and-usage \
@@ -367,6 +377,7 @@ terraform destroy -target=aws_nat_gateway.main
 **증상**: "P3009: migrate.lock is not found"
 
 **해결**:
+
 ```bash
 cd leaf-log-backend
 
@@ -401,10 +412,12 @@ aws cloudwatch put-metric-alarm \
 ### 2. 백업 설정
 
 RDS는 자동 백업이 활성화되어 있습니다:
+
 - 보관 기간: 7일
 - 백업 시간: 03:00-04:00 KST
 
 수동 스냅샷:
+
 ```bash
 aws rds create-db-snapshot \
   --db-instance-identifier leaf-log-db \
