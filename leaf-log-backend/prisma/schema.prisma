@@ -1,0 +1,94 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// 사용자 모델
+model User {
+  id                String    @id @default(cuid())
+  email             String    @unique
+  passwordHash      String?   // null for social login users
+  nickname          String    @unique
+  profileImageUrl   String?
+  bio               String?
+  provider          String    @default("local") // local, google, kakao
+  providerId        String?   // social login provider ID
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+
+  plants            Plant[]
+  posts             Post[]
+  likes             Like[]
+}
+
+// 식물 모델 (userId 추가)
+model Plant {
+  id          String   @id @default(cuid())
+  userId      String
+  name        String
+  species     String?
+  location    String?
+  imageUrl    String?
+  notes       String?
+  createdAt   DateTime @default(now())
+
+  user        User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  careRecords CareRecord[]
+}
+
+// 관리 기록 모델
+model CareRecord {
+  id        String   @id @default(cuid())
+  plantId   String
+  type      CareType
+  date      DateTime @default(now())
+  notes     String?
+
+  plant     Plant    @relation(fields: [plantId], references: [id], onDelete: Cascade)
+}
+
+// 게시글 모델
+model Post {
+  id          String   @id @default(cuid())
+  userId      String
+  title       String
+  content     String   @db.Text
+  imageUrls   String[] // 여러 이미지 URL 배열
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  likes       Like[]
+
+  @@index([userId])
+  @@index([createdAt])
+}
+
+// 좋아요 모델
+model Like {
+  id        String   @id @default(cuid())
+  userId    String
+  postId    String
+  createdAt DateTime @default(now())
+
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  post      Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, postId]) // 한 사용자는 한 게시글에 한 번만 좋아요
+  @@index([postId])
+}
+
+// 관리 기록 타입 enum
+enum CareType {
+  WATER
+  FERTILIZER
+  REPOT
+  PRUNE
+}
