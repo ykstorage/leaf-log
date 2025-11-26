@@ -88,4 +88,4 @@ pnpm-lock.yaml
 *.backup
 
 # Claude
-.claude/
+.claude/*
