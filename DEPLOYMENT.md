@@ -1,5 +1,3 @@
-# TEST
-
 # Leaf Log 배포 가이드
 
 이 문서는 Leaf Log 프로젝트를 AWS에 배포하는 전체 과정을 설명합니다.
